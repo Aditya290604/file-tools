@@ -9,8 +9,6 @@
 - ✅ PDF to JPEG/PNG converter
 - ✅ PDF slicer (split by pages or ranges)
 - ✅ Image format converter (e.g., JPEG ⇄ PNG)
-- ✅ Base64 encoder/decoder
-- ✅ JSON ⇄ CSV converter
 - 🚀 More tools coming soon...
 
 ---
