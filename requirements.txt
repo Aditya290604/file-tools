@@ -1,0 +1,7 @@
+Pillow
+img2pdf
+pdf2image
+docx2pdf
+pandas
+ttkbootstrap
+comtypes ; platform_system == "Windows"
