@@ -1,13 +1,15 @@
 import os
 from PIL import Image
-Image.MAX_IMAGE_PIXELS = None  # Allow very large images
+Image.MAX_IMAGE_PIXELS = None
 
 import img2pdf
 from pdf2image import convert_from_path
 from docx2pdf import convert as docx2pdf_convert
 import pandas as pd
-import tkinter as tk
-from tkinter import filedialog, ttk, messagebox
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
+
+from tkinter import filedialog, messagebox
 
 def convert_image(input_path, output_path, output_format):
     img = Image.open(input_path)
@@ -49,33 +51,45 @@ class ConverterGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Universal File Converter")
-        self.file_path = tk.StringVar()
-        self.output_path = tk.StringVar()
-        self.output_format = tk.StringVar(value=SUPPORTED_FORMATS[0])
+        self.file_path = tb.StringVar()
+        self.output_path = tb.StringVar()
+        self.output_format = tb.StringVar(value=SUPPORTED_FORMATS[0])
 
-        # Input file path
-        file_frame = tk.Frame(root)
+        # File path
+        file_frame = tb.Frame(root)
         file_frame.pack(pady=5, fill='x')
-        tk.Label(file_frame, text="📂 Select Input File:").pack(side='left', padx=5)
-        tk.Entry(file_frame, textvariable=self.file_path, width=40).pack(side='left', padx=5)
-        tk.Button(file_frame, text="Browse", command=self.browse_file).pack(side='left', padx=5)
+        tb.Label(file_frame, text="📂 Select Input File:").pack(side='left', padx=5)
+        tb.Entry(file_frame, textvariable=self.file_path, width=40).pack(side='left', padx=5)
+        tb.Button(file_frame, text="Browse", command=self.browse_file, bootstyle="secondary").pack(side='left', padx=5)
 
-        # Output file path
-        out_frame = tk.Frame(root)
+        # Output path
+        out_frame = tb.Frame(root)
         out_frame.pack(pady=5, fill='x')
-        tk.Label(out_frame, text="💾 Converted File Will Be Saved As:").pack(side='left', padx=5)
-        tk.Entry(out_frame, textvariable=self.output_path, width=40).pack(side='left', padx=5)
+        tb.Label(out_frame, text="💾 Converted File Will Be Saved As:").pack(side='left', padx=5)
+        tb.Entry(out_frame, textvariable=self.output_path, width=40).pack(side='left', padx=5)
 
         # Format selection
-        convert_frame = tk.LabelFrame(root, text="")
+        convert_frame = tb.LabelFrame(root, text="")
         convert_frame.pack(pady=5, fill='x')
-        tk.Label(convert_frame, text="Convert To:").pack(side='left', padx=5)
-        format_box = ttk.Combobox(convert_frame, textvariable=self.output_format, values=SUPPORTED_FORMATS, width=8, state='readonly')
+        tb.Label(convert_frame, text="Convert To:").pack(side='left', padx=5)
+        format_box = tb.Combobox(convert_frame, textvariable=self.output_format, values=SUPPORTED_FORMATS, width=8, state='readonly')
         format_box.pack(side='left', padx=5)
         format_box.bind("<<ComboboxSelected>>", lambda e: self.update_output_path())
 
-        # Convert button
-        tk.Button(root, text="Convert", command=self.run_conversion, bg='#4CAF50', fg='white', height=2).pack(pady=10, fill='x')
+        # Convert button (Rounded, Hover-enabled)
+        tb.Button(root, text="Convert", command=self.run_conversion, bootstyle="success-outline", width=40).pack(pady=10)
+
+        # Info label
+        info_text = (
+            "Supported Conversions:\n"
+            "- Images ↔ Images (JPG, PNG, JPEG)\n"
+            "- Images → PDF\n"
+            "- PDF → Images\n"
+            "- DOCX → PDF\n"
+            "- XLSX → CSV\n"
+            "- PPTX → PDF (Windows only)"
+        )
+        tb.Label(root, text=info_text, justify='left', foreground='gray').pack(pady=5)
 
     def browse_file(self):
         path = filedialog.askopenfilename()
@@ -87,7 +101,7 @@ class ConverterGUI:
         input_path = self.file_path.get()
         output_format = self.output_format.get()
         manual_output = self.output_path.get()
-        if input_path and output_format and (not manual_output or manual_output.endswith(f".{self.output_format.get()}")):
+        if input_path and output_format and (not manual_output or manual_output.endswith(f".{output_format}")):
             base = os.path.splitext(os.path.basename(input_path))[0]
             out_path = os.path.join(os.path.dirname(input_path), f"{base}.{output_format}")
             self.output_path.set(out_path)
@@ -130,9 +144,11 @@ class ConverterGUI:
             messagebox.showerror("Error", str(e))
 
 def main():
-    root = tk.Tk()
-    ConverterGUI(root)
-    root.mainloop()
+    app = tb.Window(themename="superhero")  # Try: flatly, lumen, morph, journal, "superhero", "cosmo", "solar", "cyborg"
+
+
+    ConverterGUI(app)
+    app.mainloop()
 
 if __name__ == "__main__":
     main()
