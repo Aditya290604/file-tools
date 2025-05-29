@@ -12,6 +12,12 @@
 - 🚀 More tools coming soon...
 
 ---
+## 📝 Requirements
+
+- **Python 3.10 or higher** is recommended.  
+  [Download Python 3.10+ here](https://www.python.org/downloads/)
+
+---
 
 ## 📦 Installation
 
