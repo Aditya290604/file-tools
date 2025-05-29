@@ -47,13 +47,24 @@ def pptx_to_pdf(input_path, output_path):
 
 SUPPORTED_FORMATS = ['pdf', 'jpg', 'jpeg', 'png', 'docx', 'xlsx', 'pptx']
 
+# Conversion map for dynamic dropdown
+CONVERSION_MAP = {
+    'jpg':    ['png', 'jpeg', 'pdf'],
+    'jpeg':   ['jpg', 'png', 'pdf'],
+    'png':    ['jpg', 'jpeg', 'pdf'],
+    'pdf':    ['jpg', 'jpeg', 'png'],
+    'docx':   ['pdf'],
+    'xlsx':   ['csv'],
+    'pptx':   ['pdf'],
+}
+
 class ConverterGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Universal File Converter")
         self.file_path = tb.StringVar()
         self.output_path = tb.StringVar()
-        self.output_format = tb.StringVar(value=SUPPORTED_FORMATS[0])
+        self.output_format = tb.StringVar()
 
         # File path
         file_frame = tb.Frame(root)
@@ -72,9 +83,9 @@ class ConverterGUI:
         convert_frame = tb.LabelFrame(root, text="")
         convert_frame.pack(pady=5, fill='x')
         tb.Label(convert_frame, text="Convert To:").pack(side='left', padx=5)
-        format_box = tb.Combobox(convert_frame, textvariable=self.output_format, values=SUPPORTED_FORMATS, width=8, state='readonly')
-        format_box.pack(side='left', padx=5)
-        format_box.bind("<<ComboboxSelected>>", lambda e: self.update_output_path())
+        self.format_box = tb.Combobox(convert_frame, textvariable=self.output_format, values=[], width=8, state='readonly')
+        self.format_box.pack(side='left', padx=5)
+        self.format_box.bind("<<ComboboxSelected>>", lambda e: self.update_output_path())
 
         # Convert button (Rounded, Hover-enabled)
         tb.Button(root, text="Convert", command=self.run_conversion, bootstyle="success-outline", width=40).pack(pady=10)
@@ -95,7 +106,22 @@ class ConverterGUI:
         path = filedialog.askopenfilename()
         if path:
             self.file_path.set(path)
+            self.update_format_box()
             self.update_output_path()
+
+    def update_format_box(self):
+        input_path = self.file_path.get()
+        if not input_path:
+            self.format_box['values'] = []
+            self.output_format.set('')
+            return
+        input_format = os.path.splitext(input_path)[1][1:].lower()
+        valid_outputs = CONVERSION_MAP.get(input_format, [])
+        self.format_box['values'] = valid_outputs
+        if valid_outputs:
+            self.output_format.set(valid_outputs[0])
+        else:
+            self.output_format.set('')
 
     def update_output_path(self):
         input_path = self.file_path.get()
@@ -145,8 +171,6 @@ class ConverterGUI:
 
 def main():
     app = tb.Window(themename="superhero")  # Try: flatly, lumen, morph, journal, "superhero", "cosmo", "solar", "cyborg"
-
-
     ConverterGUI(app)
     app.mainloop()
 
