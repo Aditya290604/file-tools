@@ -159,6 +159,7 @@ class ConverterGUI:
         """
         path = filedialog.askopenfilename()
         if path:
+            path = os.path.normpath(path)  # Normalize to OS default separator
             self.file_path.set(path)
             self.update_format_box()
             self.update_output_path()
@@ -190,14 +191,33 @@ class ConverterGUI:
 
     def update_output_path(self):
         """
-        Suggest an output file path based on input file and selected output format.
+        Suggest or update the output file path based on input file and selected output format.
+        If the user has edited the output path, only update the extension.
+        Ensures consistent use of OS path separators.
         """
         input_path = self.file_path.get()
+        if input_path:
+            input_path = os.path.normpath(input_path)  # Normalize input path
+            self.file_path.set(input_path)
         output_format = self.output_format.get()
+        current_output = self.output_path.get()
         if input_path and output_format:
             base = os.path.splitext(os.path.basename(input_path))[0]
-            out_path = os.path.join(os.path.dirname(input_path), f"{base}.{output_format}")
-            self.output_path.set(out_path)
+            default_dir = os.path.dirname(input_path)
+            default_name = f"{base}.{output_format}"
+            default_path = os.path.join(default_dir, default_name)
+            default_path = os.path.normpath(default_path)
+
+            if not current_output or os.path.normpath(current_output) == default_path:
+                # Suggest default
+                self.output_path.set(default_path)
+            else:
+                # User has edited output path; update only the extension
+                user_dir = os.path.dirname(current_output)
+                user_base = os.path.splitext(os.path.basename(current_output))[0]
+                new_path = os.path.join(user_dir, f"{user_base}.{output_format}")
+                new_path = os.path.normpath(new_path)
+                self.output_path.set(new_path)
 
     def run_conversion(self):
         """
