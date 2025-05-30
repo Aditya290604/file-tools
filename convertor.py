@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu May 29 12:14:46 2025
+
+@author: adity
+"""
+
+
 import os
 from PIL import Image
 Image.MAX_IMAGE_PIXELS = None
