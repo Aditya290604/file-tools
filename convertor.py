@@ -18,6 +18,8 @@ import ttkbootstrap as tb  # For modern Tkinter GUI
 from ttkbootstrap.constants import *  # Bootstrap constants for styling
 
 from tkinter import filedialog, messagebox  # For file dialogs and popups
+from pdf2docx import Converter as PDF2DocxConverter  # For PDF to DOCX conversion
+import tabula  # For PDF to XLSX conversion (extracts tables)
 
 # --- Conversion Functions ---
 
@@ -75,6 +77,27 @@ def pptx_to_pdf(input_path, output_path):
     ppt.Close()
     powerpoint.Quit()
 
+def pdf_to_docx(input_path, output_path):
+    """
+    Convert a PDF file to DOCX.
+    """
+    cv = PDF2DocxConverter(input_path)
+    cv.convert(output_path, start=0, end=None)
+    cv.close()
+
+def pdf_to_xlsx(input_path, output_path):
+    """
+    Convert a PDF file to XLSX by extracting tables.
+    """
+    dfs = tabula.read_pdf(input_path, pages='all', multiple_tables=True)
+    if dfs:
+        with pd.ExcelWriter(output_path) as writer:
+            for idx, df in enumerate(dfs):
+                sheet_name = f"Sheet{idx+1}"
+                df.to_excel(writer, sheet_name=sheet_name, index=False)
+    else:
+        raise Exception("No tables found in PDF.")
+
 # --- Supported Formats and Conversion Map ---
 
 SUPPORTED_FORMATS = ['pdf', 'jpg', 'jpeg', 'png', 'docx', 'xlsx', 'pptx']
@@ -84,7 +107,7 @@ CONVERSION_MAP = {
     'jpg':    ['png', 'jpeg', 'pdf'],
     'jpeg':   ['jpg', 'png', 'pdf'],
     'png':    ['jpg', 'jpeg', 'pdf'],
-    'pdf':    ['jpg', 'jpeg', 'png'],
+    'pdf':    ['jpg', 'jpeg', 'png', 'docx', 'xlsx'],
     'docx':   ['pdf'],
     'xlsx':   ['csv'],
     'pptx':   ['pdf'],
@@ -140,12 +163,30 @@ class ConverterGUI:
             width=40
         ).pack(pady=10)
 
+        # --- Open file/folder buttons ---
+        btn_frame = tb.Frame(root)
+        btn_frame.pack(pady=2)
+        tb.Button(
+            btn_frame,
+            text="Open Converted File",
+            command=self.open_converted_file,
+            bootstyle="info"
+        ).pack(side='left', padx=10)
+        tb.Button(
+            btn_frame,
+            text="Open Output Folder",
+            command=self.open_output_folder,
+            bootstyle="secondary"
+        ).pack(side='left', padx=10)
+
         # --- Info label with supported conversions ---
         info_text = (
             "Supported Conversions:\n"
             "- Images ↔ Images (JPG, PNG, JPEG)\n"
             "- Images → PDF\n"
             "- PDF → Images\n"
+            "- PDF → DOCX\n"
+            "- PDF → XLSX\n"
             "- DOCX → PDF\n"
             "- XLSX → CSV\n"
             "- PPTX → PDF (Windows only)"
@@ -250,6 +291,12 @@ class ConverterGUI:
                 pdf_to_images(input_path, os.path.dirname(output_path), output_format)
                 messagebox.showinfo("Success", f"PDF converted to images in folder:\n{os.path.dirname(output_path)}")
                 return
+            # --- PDF to DOCX ---
+            elif input_format == 'pdf' and output_format == 'docx':
+                pdf_to_docx(input_path, output_path)
+            # --- PDF to XLSX ---
+            elif input_format == 'pdf' and output_format == 'xlsx':
+                pdf_to_xlsx(input_path, output_path)
             # --- DOCX to PDF ---
             elif input_format == 'docx' and output_format == 'pdf':
                 docx_to_pdf(input_path, output_path)
@@ -266,6 +313,45 @@ class ConverterGUI:
             messagebox.showinfo("Success", f"File converted and saved to:\n{output_path}")
         except Exception as e:
             messagebox.showerror("Error", str(e))
+
+    def open_converted_file(self):
+        """
+        Open the converted file with the default application.
+        """
+        path = self.output_path.get()
+        if not path or not os.path.exists(path):
+            messagebox.showerror("Error", "Converted file does not exist.")
+            return
+        try:
+            if os.name == 'nt':
+                os.startfile(path)
+            elif os.name == 'posix':
+                import subprocess
+                subprocess.Popen(['xdg-open', path])
+            else:
+                messagebox.showinfo("Info", f"Please open the file manually:\n{path}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open file:\n{e}")
+
+    def open_output_folder(self):
+        """
+        Open the folder containing the converted file.
+        """
+        path = self.output_path.get()
+        folder = os.path.dirname(path)
+        if not folder or not os.path.exists(folder):
+            messagebox.showerror("Error", "Output folder does not exist.")
+            return
+        try:
+            if os.name == 'nt':
+                os.startfile(folder)
+            elif os.name == 'posix':
+                import subprocess
+                subprocess.Popen(['xdg-open', folder])
+            else:
+                messagebox.showinfo("Info", f"Please open the folder manually:\n{folder}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Could not open folder:\n{e}")
 
 # --- Main Application Entry Point ---
 

@@ -1,6 +1,8 @@
 Pillow
 img2pdf
 pdf2image
+pdf2docx
+tabula
 docx2pdf
 pandas
 ttkbootstrap
