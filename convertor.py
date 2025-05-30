@@ -19,7 +19,6 @@ from ttkbootstrap.constants import *  # Bootstrap constants for styling
 
 from tkinter import filedialog, messagebox  # For file dialogs and popups
 from pdf2docx import Converter as PDF2DocxConverter  # For PDF to DOCX conversion
-import tabula  # For PDF to XLSX conversion (extracts tables)
 
 # --- Conversion Functions ---
 
@@ -55,8 +54,15 @@ def pdf_to_images(input_path, output_folder, output_format):
 def docx_to_pdf(input_path, output_path):
     """
     Convert a DOCX file to PDF.
+    Shows a clear error if Microsoft Word is not installed.
     """
-    docx2pdf_convert(input_path, output_path)
+    try:
+        docx2pdf_convert(input_path, output_path)
+    except Exception as e:
+        raise Exception(
+            "DOCX to PDF conversion failed. This feature requires Microsoft Word to be installed on your system.\n\n"
+            f"Original error: {e}"
+        )
 
 def excel_to_csv(input_path, output_path):
     """
@@ -87,27 +93,20 @@ def pdf_to_docx(input_path, output_path):
 
 def pdf_to_xlsx(input_path, output_path):
     """
-    Convert a PDF file to XLSX by extracting tables.
+    Disabled: PDF to XLSX conversion requires Java and tabula-py, which are not installed.
     """
-    dfs = tabula.read_pdf(input_path, pages='all', multiple_tables=True)
-    if dfs:
-        with pd.ExcelWriter(output_path) as writer:
-            for idx, df in enumerate(dfs):
-                sheet_name = f"Sheet{idx+1}"
-                df.to_excel(writer, sheet_name=sheet_name, index=False)
-    else:
-        raise Exception("No tables found in PDF.")
+    raise Exception("PDF to Excel conversion is not available because it requires Java and tabula-py. Please use another tool for this conversion.")
 
 # --- Supported Formats and Conversion Map ---
 
-SUPPORTED_FORMATS = ['pdf', 'jpg', 'jpeg', 'png', 'docx', 'xlsx', 'pptx']
+SUPPORTED_FORMATS = ['pdf', 'jpg', 'jpeg', 'png', 'docx', 'xlsx', 'pptx']  # Do NOT add 'doc' here
 
 # Map input formats to possible output formats for the dropdown
 CONVERSION_MAP = {
     'jpg':    ['png', 'jpeg', 'pdf'],
     'jpeg':   ['jpg', 'png', 'pdf'],
     'png':    ['jpg', 'jpeg', 'pdf'],
-    'pdf':    ['jpg', 'jpeg', 'png', 'docx', 'xlsx'],
+    'pdf':    ['jpg', 'jpeg', 'png', 'docx'],  # Remove 'xlsx' from PDF outputs
     'docx':   ['pdf'],
     'xlsx':   ['csv'],
     'pptx':   ['pdf'],
@@ -186,7 +185,6 @@ class ConverterGUI:
             "- Images → PDF\n"
             "- PDF → Images\n"
             "- PDF → DOCX\n"
-            "- PDF → XLSX\n"
             "- DOCX → PDF\n"
             "- XLSX → CSV\n"
             "- PPTX → PDF (Windows only)"
@@ -275,6 +273,9 @@ class ConverterGUI:
             return
 
         input_format = os.path.splitext(input_path)[1][1:].lower()
+        if input_format == 'doc':
+            messagebox.showerror("Unsupported Format", "DOC files are not supported. Please convert your file to DOCX first.")
+            return
         if input_format not in SUPPORTED_FORMATS:
             messagebox.showerror("Unsupported Format", f"The file type '.{input_format}' is not supported.")
             return

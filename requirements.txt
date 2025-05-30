@@ -3,6 +3,8 @@ img2pdf
 pdf2image
 pdf2docx
 tabula
+tabula-py
+jpype1
 docx2pdf
 pandas
 ttkbootstrap
