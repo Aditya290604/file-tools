@@ -79,25 +79,25 @@ class PDFSliceGUI:
         tb.Entry(file_frame, textvariable=self.pdf_path, width=40).pack(side='left', padx=5)
         tb.Button(file_frame, text="Browse", command=self.browse_pdf, bootstyle="secondary").pack(side='left', padx=5)
 
-        # --- Start page input row ---
-        start_frame = tb.Frame(root)
-        start_frame.pack(pady=5, fill='x')
-        tb.Label(start_frame, text="Start Page:").pack(side='left', padx=5)
-        tb.Entry(start_frame, textvariable=self.start_page, width=10).pack(side='left', padx=5)
+        # --- Start and End page input row (centered horizontally) ---
+        page_frame = tb.Frame(root)
+        page_frame.pack(pady=10, fill='x')
+        # Use an internal frame to center the widgets
+        center_frame = tb.Frame(page_frame)
+        center_frame.pack(anchor='center')
+        tb.Label(center_frame, text="Start Page:").pack(side='left', padx=(5,2))
+        tb.Entry(center_frame, textvariable=self.start_page, width=10).pack(side='left', padx=(0,15))
+        tb.Label(center_frame, text="End Page:").pack(side='left', padx=(5,2))
+        tb.Entry(center_frame, textvariable=self.end_page, width=10).pack(side='left', padx=(0,5))
 
-        # --- End page input row ---
-        end_frame = tb.Frame(root)
-        end_frame.pack(pady=5, fill='x')
-        tb.Label(end_frame, text="End Page:").pack(side='left', padx=5)
-        tb.Entry(end_frame, textvariable=self.end_page, width=10).pack(side='left', padx=5)
-
-        # --- Slice button ---
+        # --- Slice button (rounded, padded, hover effect) ---
         tb.Button(
             root,
             text="Slice PDF",
             command=self.run_slice,
-            bootstyle="success-outline",
-            width=30
+            bootstyle="success-outline rounded-pill",
+            width=30,
+            padding=10
         ).pack(pady=10)
 
         # --- Info label ---
