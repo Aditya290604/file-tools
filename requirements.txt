@@ -5,3 +5,4 @@ docx2pdf
 pandas
 ttkbootstrap
 comtypes ; platform_system == "Windows"
+PyPDF2
