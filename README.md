@@ -19,6 +19,13 @@
 
 ---
 
+## 🚀 Quick Start (No Python Needed)
+
+A standalone Windows executable (`convertor.exe`) is available.  
+Just download `convertor.exe` from the releases or repository and run it directly—no Python installation required!
+
+---
+
 ## 📦 Installation
 
 Clone the repository:
