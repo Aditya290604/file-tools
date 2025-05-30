@@ -129,7 +129,7 @@ class ConverterGUI:
             state='readonly'
         )
         self.format_box.pack(side='left', padx=5)
-        self.format_box.bind("<<ComboboxSelected>>", lambda e: self.update_output_path())
+        self.format_box.bind("<<ComboboxSelected>>", lambda e: self.on_format_change())
 
         # --- Convert button ---
         tb.Button(
@@ -177,8 +177,16 @@ class ConverterGUI:
         self.format_box['values'] = valid_outputs
         if valid_outputs:
             self.output_format.set(valid_outputs[0])
+            self.update_output_path()  # Ensure output path updates when format box is set
         else:
             self.output_format.set('')
+
+    def on_format_change(self):
+        """
+        Called when the output format dropdown selection changes.
+        Updates the output path to match the new extension.
+        """
+        self.update_output_path()
 
     def update_output_path(self):
         """
@@ -186,8 +194,7 @@ class ConverterGUI:
         """
         input_path = self.file_path.get()
         output_format = self.output_format.get()
-        manual_output = self.output_path.get()
-        if input_path and output_format and (not manual_output or manual_output.endswith(f".{output_format}")):
+        if input_path and output_format:
             base = os.path.splitext(os.path.basename(input_path))[0]
             out_path = os.path.join(os.path.dirname(input_path), f"{base}.{output_format}")
             self.output_path.set(out_path)
