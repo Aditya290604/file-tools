@@ -1,6 +1,16 @@
 # 📁 File Tools
 
+[![GitHub release](https://img.shields.io/github/v/release/Aditya290604/file-tools?label=Download%20Latest%20Release)](https://github.com/Aditya290604/file-tools/releases/latest)
+
 **File Tools** is a collection of lightweight and modular command-line utilities for file conversion, document slicing, image processing, and text format manipulation.
+
+---
+
+## 📦 Download
+
+👉 [**Download the latest Universal File Converter (.exe) from the Releases page**](https://github.com/Aditya290604/file-tools/releases/latest)
+
+Or browse all releases here: [GitHub Releases](https://github.com/Aditya290604/file-tools/releases)
 
 ---
 
