@@ -2,7 +2,7 @@
 """
 Created on Thu May 29 12:14:46 2025
 
-@author: adity
+@author: Aditya
 """
 
 # --- Imports ---
