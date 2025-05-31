@@ -201,7 +201,20 @@ class ConverterGUI:
             path = os.path.normpath(path)  # Normalize to OS default separator
             self.file_path.set(path)
             self.update_format_box()
-            self.update_output_path()
+            # Always reset output path to new file's location and name with selected extension
+            input_format = os.path.splitext(path)[1][1:].lower()
+            valid_outputs = CONVERSION_MAP.get(input_format, [])
+            if valid_outputs:
+                self.output_format.set(valid_outputs[0])
+                base = os.path.splitext(os.path.basename(path))[0]
+                default_dir = os.path.dirname(path)
+                default_name = f"{base}.{valid_outputs[0]}"
+                default_path = os.path.join(default_dir, default_name)
+                default_path = os.path.normpath(default_path)
+                self.output_path.set(default_path)
+            else:
+                self.output_format.set('')
+                self.output_path.set('')
 
     def update_format_box(self):
         """
