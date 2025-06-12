@@ -38,6 +38,13 @@ def image_to_pdf(input_path, output_path):
     with open(output_path, "wb") as f:
         f.write(img2pdf.convert(input_path))
 
+def images_to_pdf(input_paths, output_path):
+    """
+    Convert multiple images to a single PDF file.
+    """
+    with open(output_path, "wb") as f:
+        f.write(img2pdf.convert(input_paths))
+
 def pdf_to_images(input_path, output_folder, output_format):
     """
     Convert each page of a PDF to separate image files.
@@ -193,15 +200,26 @@ class ConverterGUI:
 
     def browse_file(self):
         """
-        Open file dialog for user to select input file.
+        Open file dialog for user to select input file(s).
         Updates format dropdown and output path.
         """
-        path = filedialog.askopenfilename()
-        if path:
-            path = os.path.normpath(path)  # Normalize to OS default separator
+        # Always allow multi-select for images
+        paths = filedialog.askopenfilenames(filetypes=[("Image files", "*.jpg *.jpeg *.png")])
+        if paths and len(paths) > 1:
+            norm_paths = [os.path.normpath(p) for p in paths]
+            self.file_path.set(';'.join(norm_paths))
+            self.output_format.set('pdf')
+            self.format_box['values'] = ['pdf']
+            base = "merged_images"
+            default_dir = os.path.dirname(norm_paths[0])
+            default_name = f"{base}.pdf"
+            default_path = os.path.join(default_dir, default_name)
+            self.output_path.set(default_path)
+        elif paths:
+            # Single file selected
+            path = os.path.normpath(paths[0])
             self.file_path.set(path)
             self.update_format_box()
-            # Always reset output path to new file's location and name with selected extension
             input_format = os.path.splitext(path)[1][1:].lower()
             valid_outputs = CONVERSION_MAP.get(input_format, [])
             if valid_outputs:
@@ -210,11 +228,13 @@ class ConverterGUI:
                 default_dir = os.path.dirname(path)
                 default_name = f"{base}.{valid_outputs[0]}"
                 default_path = os.path.join(default_dir, default_name)
-                default_path = os.path.normpath(default_path)
                 self.output_path.set(default_path)
             else:
                 self.output_format.set('')
                 self.output_path.set('')
+        else:
+            self.file_path.set('')
+            self.output_path.set('')
 
     def update_format_box(self):
         """
@@ -281,7 +301,21 @@ class ConverterGUI:
         output_format = self.output_format.get()
 
         # --- Input validation ---
-        if not input_path or not os.path.exists(input_path):
+        if not input_path:
+            messagebox.showerror("Error", "Please select a valid file.")
+            return
+
+        # Handle multiple images for image-to-PDF
+        if ';' in input_path and output_format == 'pdf':
+            input_paths = input_path.split(';')
+            try:
+                images_to_pdf(input_paths, output_path)
+                messagebox.showinfo("Success", f"Images merged and saved as PDF:\n{output_path}")
+            except Exception as e:
+                messagebox.showerror("Error", str(e))
+            return
+
+        if not os.path.exists(input_path):
             messagebox.showerror("Error", "Please select a valid file.")
             return
 
