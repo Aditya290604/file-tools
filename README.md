@@ -19,6 +19,7 @@ Or browse all releases here: [GitHub Releases](https://github.com/Aditya290604/f
 - ✅ PDF to JPEG/PNG converter
 - ✅ PDF slicer (split by pages or ranges)
 - ✅ Image format converter (e.g., JPEG ⇄ PNG)
+- ✅ Merge multiple images into a single PDF (multi-select images)
 - 🚀 More tools coming soon...
 
 ---
